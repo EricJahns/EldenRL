@@ -64,8 +64,8 @@ def walk_to_boss():     #This can go into a seperate file                       
 
 
 #2 Margit, The fell Omen
-def walk_to_boss():
-        print("👉👹 walking #0 to the fog gate")
+def walk_to_margit():
+        print("Model: walking #0 to the fog gate")
         pydirectinput.keyDown('shift')
         pydirectinput.keyDown('w')
         pydirectinput.keyDown('d')
@@ -80,16 +80,33 @@ def walk_to_boss():
         pydirectinput.keyUp('shift')
         pydirectinput.press('f')
         time.sleep(3)
-        print("👉👹 walking #1 lock on to the boss")
+        print("walking #1 lock on to the boss")
         pydirectinput.keyDown('w')
         time.sleep(0.8)
         pydirectinput.keyUp('w')
         pydirectinput.press('tab')
-        print("👉👹 walking done")
+        print("walking done")
 
-
-
-
+def walk_to_godrick():
+        print("Model: walking #1 to the fog gate")
+        pydirectinput.press('q')
+        time.sleep(0.1)
+        pydirectinput.keyDown('w')
+        time.sleep(2)
+        pydirectinput.keyDown('d')
+        time.sleep(2)
+        pydirectinput.keyUp('d')
+        time.sleep(0.5)
+        pydirectinput.keyUp('w')
+        pydirectinput.press('e')
+        time.sleep(3)
+        print("Locking onto the boss")
+        pydirectinput.keyDown('w')
+        time.sleep(3.5)
+        pydirectinput.keyUp('w')
+        time.sleep(0.5)
+        pydirectinput.press('q')
+        print("Walking Done")
 
 
 #🐜 Run the function to test it
