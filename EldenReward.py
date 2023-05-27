@@ -34,7 +34,8 @@ class EldenReward:
         #self.time_since_seen_boss = time.time()
         #self.hp_history = []
 
-        self.max_hp = 499
+        # self.max_hp = 499
+        self.max_hp = 455
         self.prev_hp = 1.0     
         self.curr_hp = 1.0
         self.time_since_dmg_taken = time.time()
@@ -103,13 +104,12 @@ class EldenReward:
         # print('👹 Boss HP: ', boss_hp)
 
         return boss_hp
-
  
     def update(self, frame):
+        self.curr_boss_hp = self.get_boss_hp(frame)
         self.curr_hp = self.get_current_hp(frame)
         self.curr_stam = self.get_current_stamina(frame)
-        self.curr_boss_hp = self.get_boss_hp(frame)
-
+        
         self.death = False
         if self.curr_hp <= 0.01 + self.image_detection_tolerance:
             self.death = True
@@ -144,7 +144,9 @@ class EldenReward:
                 print('👹 Boss took damage', (self.prev_boss_hp - self.curr_boss_hp) * 100)
                 boss_dmg_reward = 25 + (self.prev_boss_hp - self.curr_boss_hp) * 100
                 self.time_since_boss_dmg = time.time()
-            if time.time() - self.time_since_boss_dmg > 5:
+            if time.time() - self.time_since_boss_dmg > 10:
+                boss_dmg_reward = -50
+            elif time.time() - self.time_since_boss_dmg > 5:
                 boss_dmg_reward = -25
         self.prev_boss_hp = min(self.min_boss_hp, self.prev_boss_hp)
         # print(self.curr_boss_hp, self.prev_boss_hp, self.min_boss_hp)

@@ -6,20 +6,15 @@ import numpy as np
 from gym import spaces
 import mss
 from EldenReward import EldenReward
+from walkToBoss import Navigation
 import pydirectinput
 import pytesseract                          #📍 This is used to read the text on the screen
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe' #📍path to pytesseract. We need it for image to string conversion
 
-import walkToBoss         #📍 This is the function that walks from the grace to the boss. These are hard coded for every boss and need to be changed if you want to fight a different boss.
 
 print("EldenEnv.py #0")
 
-#📝 To do:
-#📝 0. 
-#📝 1. We need to be able to set our vigor stat somewhere. And the hp bar detection needs to be based on that. (in EldenReward)
-    #📝 1.1 Implement the vigor-hp csv file and make sure it works with the hp bar detection (how much hp the player has based on his vigor (how long the ho bar is))   (in EldenReward)
-#📝 2 Finally fix the health bar reading. Computer vision is weird... (in EldenReward)
-#📝 3. Tensorboard visualization (in train.py)
+navigation = Navigation()
 
 N_CHANNELS = 3
 IMG_WIDTH = 1920
@@ -88,17 +83,17 @@ class EldenEnv(gym.Env):
         self.observation_space = gym.spaces.Dict(spaces_dict)  #📍 Defining the observation space for gym. (this is used in train.py)
         
         #📍 Class variables
-        self.reward = 0                         #📍 Current reward
-        self.rewardGen = EldenReward()          #📍 Setting up the reward generator class (see EldenReward.py)
-        self.death = False                      #📍 If the agent died
-        self.t_start = time.time()              #📍 Time when the game started
-        self.done = False                       #📍 If the game is done
-        self.iteration = 0                      #📍 Current iteration (number of steps taken in this fight)
-        self.backprop_iteration = 1000           #📍 Current iteration (number of steps taken in this fight)
-        self.total_iterations = 0               #📍 Total number of iterations (number of steps taken in all fights)
-        self.first_step = False                 #📍 If this is the first step (is set to true in reset)
-        #self.locked_on = False                 #📍 Log on needs to be hardcoded for now. (in walkToBoss.py)
-        self.max_reward = None                  #📍 The maximum reward that the agent has gotten
+        self.reward = 0
+        self.rewardGen = EldenReward()
+        self.death = False
+        self.t_start = time.time()
+        self.done = False
+        self.iteration = 0  
+        self.backprop_iteration = 1000
+        self.total_iterations = 0
+        self.first_step = False
+        #self.locked_on = False
+        self.max_reward = None
         self.reward_history = []                #📍 array of the rewards to calculate the average reward of fight            
         self.sct = mss.mss()                    #📍 initializing CV2 and MSS (used to take screenshots)
         #self.boss_hp_end_history = []          #📍 array of the boss hp at the end of each run (not implemented)
@@ -180,7 +175,7 @@ class EldenEnv(gym.Env):
         
         frame = self.grab_screen_shot()
         if self.first_step and self.rewardGen.get_boss_hp(frame) < 0.5:
-            walkToBoss.walk_to_godrick()
+            navigation.walk_to_soldier_godrick()
 
         self.reward, self.death, self.boss_death = self.rewardGen.update(frame)
 
@@ -295,6 +290,8 @@ class EldenEnv(gym.Env):
                 loading_screen_flag = True
                 t_since_seen_next = time.time()
             else:
+                if navigation.BOSS == "Soldier Godrick":
+                    pydirectinput.press('e')
                 if loading_screen_flag:
                     print('Loading screen seen. Walk back to boss will start in 2.5 seconds...')
                 else:
@@ -314,7 +311,9 @@ class EldenEnv(gym.Env):
                 #📝 if you also set self.done = True here, the environment will reset and stop moving the character.
         
         print("🔄👹 walking to boss")
-        walkToBoss.walk_to_godrick()
+        navigation.walk_to_soldier_godrick()
+        # navigation.walk_to_godrick()
+        # walkToBoss.walk_to_margit()
 
         self.iteration = 0
         self.reward_history = [] 
@@ -334,7 +333,6 @@ class EldenEnv(gym.Env):
         self.rewardGen.prev_boss_hp = 1
         self.rewardGen.min_boss_hp = 1
         self.t_start = time.time()
-
 
         observation = cv2.resize(frame, (MODEL_WIDTH, MODEL_HEIGHT))
         self.action_history = []
